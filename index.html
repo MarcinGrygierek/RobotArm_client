@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Robot Control</title>
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="page-header">
+        Arduino Robot Control
+      </h1>
+        <div class="col-md-12">
+            Status:
+            <div id="connection-status" class="label label-danger">Disconnected</div>
+            <!-- <button class="btn btn-primary" id="button-connect">Connect</button> -->
+            <hr/>
+        </div>
+
+        <div class="col-md-3">
+            <h2>Readings</h2>
+            <table class="table table-hover table-striped">
+
+                <tr>
+                    <td>Base</td>
+                    <td id="angle-base">0</td>
+                </tr>
+                <tr>
+                    <td>Shoulder</td>
+                    <td id="angle-shoulder">0</td>
+                </tr>
+                <tr>
+                    <td>Elbow</td>
+                    <td id="angle-elbow">0</td>
+                </tr>
+                <tr>
+                    <td>Wrist</td>
+                    <td id="angle-wrist">0</td>
+                </tr>
+                <tr>
+                    <td>Gripper rotation</td>
+                    <td id="angle-gripper-rotation">0</td>
+                </tr>
+                <tr>
+                    <td>Gripper</td>
+                    <td id="angle-gripper">0</td>
+                </tr>
+                <tr>
+                    <td>Color R</td>
+                    <td id="color-r">0</td>
+                </tr>
+                <tr>
+                    <td>Color G</td>
+                    <td id="color-g">0</td>
+                </tr>
+                <tr>
+                    <td>Color B</td>
+                    <td id="color-b">0</td>
+                </tr>
+            </table>
+            <div id="readings-color">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h2>Configuration</h2>
+            <div class="checkbox">
+                <label><input type="checkbox" id="use-color-sorting" value="">Use color</label>
+            </div>
+            When this option is selected objects will be sorted to three containers: red, green and blue.
+            <h3>Objects data</h3>
+            <div class="row">
+                <div id="sorting-non-color" class="col-xs-12">
+                    <h4>Starting position/Destination</h4>
+                    <table id="positions-non-color" class="table table-condensed table-striped">
+                        <thead>
+                            <tr>
+                                <th>X</th>
+                                <th>Y</th>
+                                <th>Z</th>
+                                <th>Dest. X</th>
+                                <th>Dest. Y</th>
+                                <th>Dest. Z</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input class="position-val form-control"></td>
+                                <td><input class="position-val form-control"></td>
+                                <td><input class="position-val form-control"></td>
+                                <td><input class="position-val form-control"></td>
+                                <td><input class="position-val form-control"></td>
+                                <td><input class="position-val form-control"></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="sorting-color-positions" class="col-xs-6">
+                    <h4>Objects position</h4>
+                    <table id="positions-color" class="table table-condensed table-striped">
+                        <thead>
+                            <tr>
+                                <th>X</th>
+                                <th>Y</th>
+                                <th>Z</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input class="position-val form-control"></td>
+                                <td><input class="position-val form-control"></td>
+                                <td><input class="position-val form-control"></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="sorting-color-containers" class="col-xs-6">
+                    <h4>Containers position</h4>
+                    <table id="positions-containers" class="table table-condensed table-striped">
+                        <thead>
+                            <tr>
+                                <th>Color</th>
+                                <th>X</th>
+                                <th>Y</th>
+                                <th>Z<th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="container-red">
+                                <td class="container-name">Red</td>
+                                <td><input class="container-x form-control"></td>
+                                <td><input class="container-y form-control"></td>
+                                <td><input class="container-z form-control"></td>
+                            </tr>
+                            <tr id="container-blue">
+                                <td class="container-name">Green</td>
+                                <td><input class="container-x form-control"></td>
+                                <td><input class="container-y form-control"></td>
+                                <td><input class="container-z form-control"></td>
+                            </tr>
+                            <tr id="container-green">
+                                <td class="container-name">Blue</td>
+                                <td><input class="container-x form-control"></td>
+                                <td><input class="container-y form-control"></td>
+                                <td><input class="container-z form-control"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+
+            <button id="button-add-object" class="btn btn-lg btn-success">Add object</button>
+            <hr/>
+            <button id="button-save" class="btn btn-lg btn-primary">Save</button>
+            <button id="button-reset" class="btn btn-lg btn-danger">Reset</button>
+            <button id="button-start" class="btn btn-lg btn-success">Start</button>
+        </div>
+        <div class="col-md-3">
+          <h2>Logs<button id="button-clear-logs" class="btn btn-danger">Clear logs</button></h2>
+          <div id="log"></div>
+        </div>
+
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="js/js.js"></script>
+</body>
+
+</html>
