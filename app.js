@@ -2,7 +2,7 @@ const SerialPort = require("serialport");
 let com;
 let socket;
 let status;
-let useColorSortingFlag = false;
+let workingMethod;
 
 function newColor(r, g, b) {
     if (!socket) return;
@@ -28,63 +28,81 @@ function updateAngles(angles) {
 }
 
 function portClosed() {
-	if (!socket) return;
-	socket.emit('portClosed', {});
+    if (!socket) return;
+    socket.emit('portClosed', {});
 }
 
 function portError(error) {
-	if (!socket) return;
-	socket.emit('portError', {
-			error
-	})
+    if (!socket) return;
+    socket.emit('portError', {
+        error
+    })
 }
 
 function start() {
-	if(!com) {
-		portClosed();
-		return;
-	}
-	com.write([0xFF, 0x01, 0xFE]);
+    if (!com) {
+        portClosed();
+        return;
+    }
+    com.write([0xFF, 0x01, 0xFE]);
 }
 
 function reset() {
-	if(!com) {
-		portClosed();
-		return;
-	}
-	com.write([0xFF, 0x00, 0xFE]);
+    if (!com) {
+        portClosed();
+        return;
+    }
+    com.write([0xFF, 0x00, 0xFE]);
 }
 
-function saveColorInfo(useColorSorting) {
-	if(!com) {
-		portClosed();
-		return;
-	}
-	useColorSortingFlag = useColorSorting;
-	if(useColorSorting) com.write([0xFF, 0x02, 0xFE]);
-	else com.write([0xFF, 0x03, 0xFE]);
+function saveWorkingMethod(_workingMethod) {
+    if (!com) {
+        portClosed();
+        return;
+    }
+    workingMethod = _workingMethod;
+    switch (workingMethod) {
+        case 'COLOR_BASED':
+            com.write([0xFF, 0x02, 0xFE]);
+            break;
+        case 'GIVEN_POSITION':
+            com.write([0xFF, 0x03, 0xFE]);
+            break;
+        case 'DIRECT_ANGLE':
+            com.write([0xFF, 0x06, 0xFE]);
+            break;
+    }
 }
 
 function saveObjects(objects) {
-	if(useColorSortingFlag == true) {
-		newMessage('Incorrect format for color sorting');
-		return;
-	}
+    if (workingMethod === "COLOR_BASED") {
+        newMessage('Incorrect format for color sorting');
+        return;
+    }
 
-	let packet = [];
-	objects.forEach(function(record) {
-		packet = [0xFF, 0x04];
-		record.forEach(function(value) {
-				packet.push(Number(value) + 128);
-		});
-		packet.push(0xFE);
-		console.log(packet);
-		com.write(packet);
-	});
+    let packet = [];
+    objects.forEach(function(record) {
+        packet = [0xFF, 0x04];
+        record.forEach(function(value) {
+            packet.push(Number(value) + 128);
+        });
+        packet.push(0xFE);
+        com.write(packet);
+    });
+}
+
+function saveAngles(angles) {
+
+    let packet = [];
+    packet = [0xFF, 0x07];
+    angles.forEach(function(value) {
+        packet.push(Number(value));
+    });
+    packet.push(0xFE);
+    com.write(packet);
 }
 
 function inputData(data) {
-		console.log(data);
     if (data == '') return;
 
     let code = data.substr(0, 3);
@@ -92,12 +110,10 @@ function inputData(data) {
     if (code == 'COL') {
         let colors = data.substr(3).split(',');
         newColor(colors[0], colors[1], colors[2]);
-    }
-    else if(code == 'ANG') {
-      let angles = data.substr(3).split(',');
+    } else if (code == 'ANG') {
+        let angles = data.substr(3).split(',');
         updateAngles(angles);
-    }
-		else if(code == 'MSG') {
+    } else if (code == 'MSG') {
         let message = data.substr(3);
         newMessage(message);
     }
@@ -118,12 +134,12 @@ function comConnect(comName) {
         inputData(data.trim());
     });
 
-		com.on('error', function(error) {
-			portError(error);
-		})
+    com.on('error', function(error) {
+        portError(error);
+    })
 
-		com.on('close', function() {
-      portClosed();
+    com.on('close', function() {
+        portClosed();
     });
 }
 
@@ -165,24 +181,28 @@ app.get('/status', function(req, res) {
 io.on('connection', function(socketConnected) {
     socket = socketConnected;
 
-		socket.on('start', function() {
-			start();
-		});
+    socket.on('start', function() {
+        start();
+    });
 
-		socket.on('reset', function() {
-			reset();
-		});
+    socket.on('reset', function() {
+        reset();
+    });
 
-		socket.on('saveObjects', function(objects) {
-			saveObjects(objects);
-		});
+    socket.on('saveObjects', function(objects) {
+        saveObjects(objects);
+    });
 
-		socket.on('saveColorInfo', function(useColorSorting) {
-			saveColorInfo(useColorSorting);
-		});
+    socket.on('saveAngles', function(angles) {
+        saveAngles(angles);
+    });
+
+    socket.on('saveWorkingMethodInfo', function(workingMethod) {
+        saveWorkingMethod(workingMethod);
+    });
 
     socket.on('saveContainers', function(containers) {
-      saveContainers(containers);
+        saveContainers(containers);
     });
 });
 

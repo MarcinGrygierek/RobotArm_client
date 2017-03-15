@@ -53,25 +53,41 @@ $(function() {
         start();
     })
 
-    var useColorSorting = $('#use-color-sorting').prop('checked');
+    var workMethod = $('input[name=working-method]:checked').val();
 
-    function checkColorSorting() {
-        if (useColorSorting) {
-            $('#sorting-non-color').hide();
-            $('#sorting-color-positions').show();
-            $('#sorting-color-containers').show();
-        } else {
-            $('#sorting-color-positions').hide();
-            $('#sorting-color-containers').hide();
-            $('#sorting-non-color').show();
+
+    function checkWorkMethod() {
+        console.log(workMethod);
+        switch (workMethod) {
+            case 'GIVEN_POSITION':
+                $('#sorting-color-positions').hide();
+                $('#sorting-color-containers').hide();
+                $('#direct-angles').hide();
+                $('#button-add-object').show();
+                $('#sorting-non-color').show();
+                break;
+            case 'COLOR_BASED':
+                $('#sorting-non-color').hide();
+                $('#direct-angles').hide();
+                $('#button-add-object').show();
+                $('#sorting-color-positions').show();
+                $('#sorting-color-containers').show();
+                break;
+            case 'DIRECT_ANGLE':
+                $('#sorting-color-positions').hide();
+                $('#sorting-color-containers').hide();
+                $('#sorting-non-color').hide();
+                $('#button-add-object').hide();
+                $('#direct-angles').show();
+                break;
         }
     }
 
-    checkColorSorting();
+    checkWorkMethod();
 
-    $('#use-color-sorting').click(function() {
-        useColorSorting = $('#use-color-sorting').prop('checked');
-        checkColorSorting()
+    $('input[name=working-method').change(function() {
+        workMethod = $('input[name=working-method]:checked').val();
+        checkWorkMethod()
     });
 
     $("#button-reset").click(function() {
@@ -87,31 +103,43 @@ $(function() {
         var objects = [];
         var record = [];
 
-        socket.emit('saveColorInfo', useColorSorting);
+        socket.emit('saveWorkingMethodInfo', workMethod);
 
-        if (useColorSorting) {
-
-        } else {
-            $('#positions-non-color tbody tr').each(function() {
-                record = []
-                $(this).find(".position-val").each(function() {
-                    record.push($(this).val())
-                })
-                objects.push(record);
-            });
-
-
-            socket.emit('saveObjects', objects);
+        switch (workMethod) {
+            case "COLOR_BASED":
+                break;
+            case "GIVEN_POSITION":
+                $('#positions-non-color tbody tr').each(function() {
+                    record = []
+                    $(this).find(".position-val").each(function() {
+                        record.push($(this).val())
+                    })
+                    objects.push(record);
+                });
+                socket.emit('saveObjects', objects);
+                break;
+            case "DIRECT_ANGLE":
+                break;
         }
         log('Saving configuration to device');
     });
 
+    $('#button-update-angles').click(function() {
+      var angles = [];
+      $('#angles tbody tr').each(function() {
+          $(this).find(".joint-angle").each(function() {
+              angles.push($(this).val())
+          })
+      });
+      socket.emit('saveAngles', angles);
+    });
+
     $('#button-add-object').click(function() {
-        if (useColorSorting) {
+        if (workMethod === "COLOR_BASED") {
             $('#positions-color tbody').append('<tr><td><input class="position-val form-control"></td><td><input class="position-val form-control"></td><td>' +
                 '<input class="position-val form-control"></td><td><button class="btn btn-danger remove-row glyphicon glyphicon-minus"></button></td></tr>');
 
-        } else {
+        } else if (workMethod === "GIVEN_POSITION") {
             $('#positions-non-color tbody').append('<tr><td><input class="position-val form-control"></td><td><input class="position-val form-control"></td><td><input class="position-val form-control"></td>' +
                 '<td><input class="position-val form-control"></td><td><input class="position-val form-control"></td><td><input class="position-val form-control"></td><td><button class="btn btn-danger remove-row glyphicon glyphicon-minus"></button></td></tr>');
         }

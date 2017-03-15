@@ -66,10 +66,12 @@
         </div>
         <div class="col-md-6">
             <h2>Configuration</h2>
-            <div class="checkbox">
-                <label><input type="checkbox" id="use-color-sorting" value="">Use color</label>
+            <div class="radio">
+                <label><input type="radio" name="working-method" id="use-position-sorting" value="GIVEN_POSITION" checked>Sorting using given position</label><br>
+                <label><input type="radio" name="working-method" id="use-color-sorting" value="COLOR_BASED">Color based sorting</label><br>
+                <label><input type="radio" name="working-method" id="use-direct-angles" value="DIRECT_ANGLE">Direct angles</label>
             </div>
-            When this option is selected objects will be sorted to three containers: red, green and blue.
+
             <h3>Objects data</h3>
             <div class="row">
                 <div id="sorting-non-color" class="col-xs-12">
@@ -129,7 +131,8 @@
                                 <th>Color</th>
                                 <th>X</th>
                                 <th>Y</th>
-                                <th>Z<th>
+                                <th>Z
+                                    <th>
                             </tr>
                         </thead>
                         <tbody>
@@ -154,6 +157,44 @@
                         </tbody>
                     </table>
                 </div>
+                <div id="direct-angles" class="col-xs-12">
+                    <h4>Angles</h4>
+                    <table id="angles" class="table table-condensed table-striped">
+                        <thead>
+                            <tr>
+                                <th>Joint</th>
+                                <th>Angle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Base</td>
+                                <td><input type="number" class="joint-angle form-control" value="90"></td>
+                            </tr>
+                            <tr>
+                                <td>Shoulder</td>
+                                <td><input type="number" class="joint-angle form-control" value="90"></td>
+                            </tr>
+                            <tr>
+                                <td>Elbow</td>
+                                <td><input type="number" class="joint-angle form-control" value="90"></td>
+                            </tr>
+                            <tr>
+                                <td>Wrist</td>
+                                <td><input type="number" class="joint-angle form-control" value="90"></td>
+                            </tr>
+                            <tr>
+                                <td>Gripper rotation</td>
+                                <td><input type="number" class="joint-angle form-control" value="90"></td>
+                            </tr>
+                            <tr>
+                                <td>Gripper</td>
+                                <td><input type="number" class="joint-angle form-control" value="90"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button id="button-update-angles" class="btn btn-lg btn-primary">Update</button>
+                </div>
 
 
             </div>
@@ -165,8 +206,8 @@
             <button id="button-start" class="btn btn-lg btn-success">Start</button>
         </div>
         <div class="col-md-3">
-          <h2>Logs<button id="button-clear-logs" class="btn btn-danger">Clear logs</button></h2>
-          <div id="log"></div>
+            <h2>Logs<button id="button-clear-logs" class="btn btn-danger">Clear logs</button></h2>
+            <div id="log"></div>
         </div>
 
     </div>
